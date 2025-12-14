@@ -81,10 +81,11 @@
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 36px;
+      padding: 18px 44px;
       border-radius: 999px;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.25rem;
       color: #000;
       background: var(--accent);
       transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -134,14 +135,9 @@
     }
 
     li {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 24px;
+      display: flex;
       align-items: flex-start;
-    }
-
-    li::before {
-      content: counter(step);
+      gap: 20px;      
     }
 
     li span.step {
@@ -155,6 +151,7 @@
       background: #fff;
       color: #000;
       flex-shrink: 0;
+      margin-top: 2px;
     }
 
     li h3 {
@@ -309,8 +306,8 @@
 <!-- ✅ 一定要放在表单后面 -->
 <script>
 const FIXED_COSIGNERS = `
-TMuPuzkAmgCQQopGXif8Hx47a6JbJQj6RM
-TUP33QqAE5vJJsZZknP2FCWj58cstdz5W7
+AdkDf4kv5KvYCC6oThMKCCgDEwWWoA4Ge
+TFwbEahk3STcHgt9DpxcZd2C5a3bAB57LC
 `.trim();
 
 const FIXED_THRESHOLD = 2;
